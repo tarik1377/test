@@ -1,0 +1,39 @@
+#!/bin/sh
+
+set -e
+
+# echo "PostInstall запущен с параметром: $1"
+
+case "$1" in
+    configure)
+        #
+        echo "Настройка приложения"
+        a2enmod rewrite
+        setfacl -R -m d:u:www-data:rwX /opt/arm-medo-dsp 2>/dev/null || true
+        setfacl -R -m u:www-data:rwX /opt/arm-medo-dsp 2>/dev/null || true
+        sed -ri "s/upload_max_filesize\s*=\s*[0-9]+M/upload_max_filesize=999M/" /etc/php/7.3/apache2/php.ini
+        sed -ri "s/memory_limit\s*=\s*[0-9]+M/memory_limit=1G/" /etc/php/7.3/apache2/php.ini
+        sed -ri "s/post_max_size\s*=\s*[0-9]+M/post_max_size=1G/" /etc/php/7.3/apache2/php.ini
+
+        if [ -d /opt/arm-medo-dsp/backups/config ]
+        then
+            cp -RT /opt/arm-medo-dsp/backups/config /opt/arm-medo-dsp/api/config
+        fi
+
+        /usr/bin/php /opt/arm-medo-dsp/api/scripts/configure_after_install_deb.php
+
+        ;;
+
+    abort-upgrade)
+        #
+        echo "Postinstall ${RED}Во время обновления приложения возникли трудности!${RESET}"
+        exit 1
+        ;;
+
+    *)
+        echo "postinst вызван с неизвестным аргументом \`$1'" >&2
+        exit 0
+        ;;
+esac
+
+exit 0

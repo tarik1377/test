@@ -1,0 +1,61 @@
+#!/bin/sh
+
+set -e
+
+RESET=$(tput sgr0)
+GREEN=$(tput setaf 2)
+RED=$(tput setaf 1)
+
+if [ ! -f "/opt/cprocsp/bin/amd64/certmgr" ] || [ ! -f "/opt/cprocsp/bin/amd64/cryptcp" ]; then
+
+    echo "${RED}Не найдена утилита '/opt/cprocsp/bin/amd64/certmgr' или '/opt/cprocsp/bin/amd64/cryptcp'. Пожалуйста, установите сначала КриптоПро CSP!${RESET}"
+    exit 1
+
+fi
+
+
+case "$1" in
+    install)
+        # do some magic
+        echo "Установка приложения"
+        #dpkg -s "apache2" >/dev/null 2>&1 || echo "Найден установленный Apache2. Установка отменена." && exit 1
+        ;;
+
+    upgrade)
+        #
+        echo "Обновление приложения"
+
+        /opt/arm-medo-dsp/api/service stop
+
+        if [ -f /opt/arm-medo-dsp/api/scripts/backup.php ]
+        then
+            /usr/bin/php /opt/arm-medo-dsp/api/scripts/backup.php
+        fi
+
+        ;;
+
+    abort-upgrade)
+        #
+        echo "${RED}Во время обновления приложения возникли трудности abort-upgrade!${RESET}"
+        exit 1
+        ;;
+
+    failed-upgrade)
+        #
+        echo "${RED}Во время обновления приложения возникли трудности failed-upgrade!${RESET}"
+        exit 1
+        ;;
+
+    *)
+        echo "Preinstall вызван с неизвестным аргументом \`$1'" >&2
+        exit 1
+        ;;
+esac
+
+exit 0
+
+
+
+
+
+
