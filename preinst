@@ -31,6 +31,24 @@ case "$1" in
     install)
         # do some magic
         echo "Установка приложения"
+
+        # Проверка версии PostgreSQL
+        pg_version=$(pg_config --version)
+        if [[ $pg_version != *\"PostgreSQL 11\"* ]]; then
+            echo "Неправильная версия PostgreSQL. Переключение на PostgreSQL 11."
+            sudo pg_dropcluster --stop 14 main
+            sudo pg_createcluster --start 11 main
+        fi
+
+        # Проверка версии PHP
+        php_version=$(php -v)
+        if [[ $php_version != *\"PHP 7.3\"* ]]; then
+            echo "Неправильная версия PHP. Переключение на PHP 7.3."
+            sudo a2dismod php8.1
+            sudo a2enmod php7.3
+            sudo service apache2 restart
+        fi
+
         #dpkg -s "apache2" >/dev/null 2>&1 || echo "Найден установленный Apache2. Установка отменена." && exit 1
         ;;
 
@@ -66,7 +84,6 @@ case "$1" in
 esac
 
 exit 0
-
 
 
 
