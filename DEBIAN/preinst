@@ -13,6 +13,19 @@ if [ ! -f "/opt/cprocsp/bin/amd64/certmgr" ] || [ ! -f "/opt/cprocsp/bin/amd64/c
 
 fi
 
+# Проверка версии PostgreSQL
+pg_version=$(pg_config --version)
+if [[ $pg_version != *"PostgreSQL 11"* ]]; then
+    echo "${RED}PostgreSQL 11 не установлен. Пожалуйста установити его и ппробуйте ещё раз.${RESET}"
+    exit 1
+fi
+
+# Проверка версии PHP
+php_version=$(php -v)
+if [[ $php_version != *"PHP 7.3"* ]]; then
+    echo "${RED}PHP 7.3 не установлен. Пожалуйста установити его и ппробуйте ещё раз.${RESET}"
+    exit 1
+fi
 
 case "$1" in
     install)
