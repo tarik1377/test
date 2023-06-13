@@ -2,54 +2,54 @@
 
 set -e
 
-# echo "PostInstall запущен с параметром: $1"
+RESET=$(tput sgr0)
+GREEN=$(tput setaf 2)
+RED=$(tput setaf 1)
+
+if [ ! -f "/opt/cprocsp/bin/amd64/certmgr" ] || [ ! -f "/opt/cprocsp/bin/amd64/cryptcp" ]; then
+
+    echo "${RED}Не найдена утилита '/opt/cprocsp/bin/amd64/certmgr' или '/opt/cprocsp/bin/amd64/cryptcp'. Пожалуйста, установите сначала КриптоПро CSP!${RESET}"
+    exit 1
+
+fi
+
 
 case "$1" in
-    configure)
+    install)
+        # do some magic
+        echo "Установка приложения"
+
+        #dpkg -s "apache2" >/dev/null 2>&1 || echo "Найден установленный Apache2. Установка отменена." && exit 1
+        ;;
+
+    upgrade)
         #
-        echo "Настройка приложения"
-        a2enmod rewrite || true
-        setfacl -R -m d:u:www-data:rwX /opt/arm-medo-dsp 2>/dev/null || true
-        setfacl -R -m u:www-data:rwX /opt/arm-medo-dsp 2>/dev/null || true
-        sed -ri "s/upload_max_filesize\s*=\s*[0-9]+M/upload_max_filesize=999M/" /etc/php/7.3/apache2/php.ini || true
-        sed -ri "s/memory_limit\s*=\s*[0-9]+M/memory_limit=1G/" /etc/php/7.3/apache2/php.ini || true
-        sed -ri "s/post_max_size\s*=\s*[0-9]+M/post_max_size=1G/" /etc/php/7.3/apache2/php.ini || true
+        echo "Обновление приложения"
 
-        if [ -d /opt/arm-medo-dsp/backups/config ]
+        /opt/arm-medo-dsp/api/service stop || true
+
+        if [ -f /opt/arm-medo-dsp/api/scripts/backup.php ]
         then
-            cp -RT /opt/arm-medo-dsp/backups/config /opt/arm-medo-dsp/api/config || true
-        fi
-
-        /usr/bin/php /opt/arm-medo-dsp/api/scripts/configure_after_install_deb.php || true
-
-        pg_version=$(psql -V) || true
-        if [[ "$pg_version" != *"psql (PostgreSQL) 11"* ]]; then
-            echo "Неправильная версия PostgreSQL. Переключение на PostgreSQL 11."
-            sudo pg_dropcluster --stop 14 main || true
-            sudo pg_createcluster --start 11 main || true
-        fi
-
-        php_version=$(php -v) || true
-        if [[ "$php_version" != *"PHP 7.3"* ]]; then
-            echo "Неправильная версия PHP. Переключение на PHP 7.3."
-            sudo a2dismod php8.1 || true
-            sudo a2enmod php7.3 || true
-            sudo update-alternatives --set php /usr/bin/php7.3 || true
-            sudo service apache2 restart || true
-            /usr/bin/php /opt/arm-medo-dsp/api/scripts/configure_after_install_deb.php || true
+            /usr/bin/php /opt/arm-medo-dsp/api/scripts/backup.php || true
         fi
 
         ;;
 
     abort-upgrade)
         #
-        echo "Postinstall ${RED}Во время обновления приложения возникли трудности!${RESET}"
+        echo "${RED}Во время обновления приложения возникли трудности abort-upgrade!${RESET}"
+        exit 1
+        ;;
+
+    failed-upgrade)
+        #
+        echo "${RED}Во время обновления приложения возникли трудности failed-upgrade!${RESET}"
         exit 1
         ;;
 
     *)
-        echo "postinst вызван с неизвестным аргументом \`$1'" >&2
-        exit 0
+        echo "Preinstall вызван с неизвестным аргументом \`$1'" >&2
+        exit 1
         ;;
 esac
 
