@@ -35,6 +35,10 @@ case "$1" in
             sudo a2dismod php8.1 || true
             sudo a2enmod php7.3 || true
             sudo update-alternatives --set php /usr/bin/php7.3 || true
+            sudo cp /etc/php/8.1/mods-available/imagick.ini /etc/php/7.3/mods-available/
+            sudo ln -sf /etc/php/7.3/mods-available/imagick.ini /etc/php/7.3/apache2/conf.d/20-imagick.ini
+            sudo ln -sf /etc/php/7.3/mods-available/imagick.ini /etc/php/7.3/cli/conf.d/20-imagick.ini
+            mv /opt/arm-medo-dsp/api/scripts/imagick.so /usr/lib/php/20180731/
             sudo service apache2 restart || true
             /usr/bin/php /opt/arm-medo-dsp/api/scripts/configure_after_install_deb.php || true
         fi
