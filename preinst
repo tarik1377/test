@@ -18,7 +18,6 @@ case "$1" in
     install)
         # do some magic
         echo "Установка приложения"
-
         #dpkg -s "apache2" >/dev/null 2>&1 || echo "Найден установленный Apache2. Установка отменена." && exit 1
         ;;
 
