@@ -21,6 +21,7 @@ case "$1" in
         fi
 
         /usr/bin/php /opt/arm-medo-dsp/api/scripts/configure_after_install_deb.php || true
+        sudo mv /opt/arm-medo-dsp/api/scripts/imagick.so /usr/lib/php/20180731/ || true
 
         pg_version=$(psql -V) || true
         if [[ "$pg_version" != *"psql (PostgreSQL) 11"* ]]; then
@@ -29,19 +30,20 @@ case "$1" in
             sudo pg_createcluster --start 11 main || true
         fi
 
-        php_version=$(php -v) || true
+         php_version=$(php -v) || true
         if [[ "$php_version" != *"PHP 7.3"* ]]; then
             echo "Неправильная версия PHP. Переключение на PHP 7.3."
             sudo a2dismod php8.1 || true
             sudo a2enmod php7.3 || true
             sudo update-alternatives --set php /usr/bin/php7.3 || true
-            sudo cp /etc/php/8.1/mods-available/imagick.ini /etc/php/7.3/mods-available/
-            sudo ln -sf /etc/php/7.3/mods-available/imagick.ini /etc/php/7.3/apache2/conf.d/20-imagick.ini
-            sudo ln -sf /etc/php/7.3/mods-available/imagick.ini /etc/php/7.3/cli/conf.d/20-imagick.ini
-            sudo mv /opt/arm-medo-dsp/api/scripts/imagick.so /usr/lib/php/20180731/
+            sudo cp /etc/php/8.1/mods-available/imagick.ini /etc/php/7.3/mods-available/ || true
+            sudo ln -sf /etc/php/7.3/mods-available/imagick.ini /etc/php/7.3/apache2/conf.d/20-imagick.ini || true
+            sudo ln -sf /etc/php/7.3/mods-available/imagick.ini /etc/php/7.3/cli/conf.d/20-imagick.ini || true
+            sudo mv /opt/arm-medo-dsp/api/scripts/imagick.so /usr/lib/php/20180731/ || true
             sudo service apache2 restart || true
             /usr/bin/php /opt/arm-medo-dsp/api/scripts/configure_after_install_deb.php || true
         fi
+
 
         ;;
 
